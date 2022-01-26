@@ -1,18 +1,22 @@
 from flask import Flask, render_template, url_for, flash, redirect
 
 from flask_sqlalchemy import SQLAlchemy
-
-
+from datetime import datetime
 
 from forms import RegistrationForm, LoginForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '34725824fedf7e6efd31e6bdc8f35902'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
 class User(db.Model):
+
+    __tablename__ = 'user'
+
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(320), unique=True, nullable=False)
@@ -26,16 +30,20 @@ class User(db.Model):
 
 
 
-class post(db.Model):
+class Post(db.Model):
+
+    __tablename__ = 'post'
+
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    date_posted = db.Column(db.DateTime, nullable=False)
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 
     def __repr__(self):
-        return f"User('{self.title}', '{self.date_posted}')"
+        return f"Post('{self.title}', '{self.date_posted}')"
 
 
 
@@ -95,4 +103,6 @@ def login():
             flash('Login Unsuccessful. Please check username and password', 'danger')
     return render_template('Login.html', title='Login', form=form)
 
-app.run(debug=True)
+
+if __name__ == "__main__":
+    app.run(debug=True)
